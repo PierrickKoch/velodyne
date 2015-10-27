@@ -1,0 +1,19 @@
+Please follow these steps to use this driver to log data with a Velodyne HDL-64E
+
+  1) Install Pcap library by "sudo apt-get install libpcap-dev" in a terminal
+
+  2) Copy driver folder to ROS workspace and compile
+
+     Note: you might need to change access permission of the "velodyne_driver_64/velodyne_pointcloud/cfg/VelodyneConfig.cfg" file, by "chmod 777 VelodyneConfig.cfg" in a terminal
+
+  3) Find calibration file "64db.xml" coming with the sensor, generate a "64db.yaml" file by "rosrun velodyne_pointcloud gen_calibration.py 64db.xml" and rename the generated file to "HDL-64E.yaml", then replace the "HDL-64E.yaml" file in the "velodyne_driver_64/velodyne_launch/params" folder
+
+     Note: you might need to change access permission of the "velodyne_driver_64/velodyne_pointcloud/scripts/gen_calibration.py" file, by "chmod 777 gen_calibration.py" in a terminal
+
+  4) Change "save_data_dir" in the "velodyne_driver_64/velodyne_launch/launch/HDL-64E.launch" file to where you want the Velodyne data to be saved
+
+  5) Set computer IP to 192.168.3.100, connect Velodyne ethernet cable and power on Velodyne
+
+  6) In a terminal, use "roslaunch velodyne_launch HDL-64E.launch" to launch the driver and log data
+
+  7) You should see raw point clouds showing in RVIZ and a "velodyneData.bag" file saved in the directory specified in 3)

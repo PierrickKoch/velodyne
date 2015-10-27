@@ -34,36 +34,31 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   config_.frame_id = tf::resolve(tf_prefix, config_.frame_id);
 
   // get model name, validate string, determine packet rate
-  private_nh.param("model", config_.model, std::string("64E"));
+  private_nh.param("model", config_.model, std::string("64E_S2"));
   double packet_rate;                   // packet frequency (Hz)
-  std::string model_full_name;
   if ((config_.model == "64E_S2") || 
       (config_.model == "64E_S2.1"))    // generates 1333312 points per second
     {                                   // 1 packet holds 384 points
       packet_rate = 3472.17;            // 1333312 / 384
-      model_full_name = std::string("HDL-") + config_.model;
     }
   else if (config_.model == "64E")
     {
       packet_rate = 2600.0;
-      model_full_name = std::string("HDL-") + config_.model;
     }
   else if (config_.model == "32E")
     {
       packet_rate = 1808.0;
-      model_full_name = std::string("HDL-") + config_.model;
     }
-  else if (config_.model == "VLP16")
+  else if (config_.model == "16")
     {
-      packet_rate = 781.25;             // 300000 / 384
-      model_full_name = "VLP-16";
+      packet_rate = 750.0;
     }
   else
     {
       ROS_ERROR_STREAM("unknown Velodyne LIDAR model: " << config_.model);
       packet_rate = 2600.0;
     }
-  std::string deviceName(std::string("Velodyne ") + model_full_name);
+  std::string deviceName("Velodyne HDL-" + config_.model);
 
   private_nh.param("rpm", config_.rpm, 600.0);
   ROS_INFO_STREAM(deviceName << " rotating at " << config_.rpm << " RPM");
@@ -77,9 +72,6 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
 
   std::string dump_file;
   private_nh.param("pcap", dump_file, std::string(""));
-
-  int udp_port;
-  private_nh.param("port", udp_port, (int)UDP_PORT_NUMBER);
 
   // initialize diagnostics
   diagnostics_.setHardwareID(deviceName);
@@ -104,14 +96,8 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     }
   else
     {
-      input_.reset(new velodyne_driver::InputSocket(private_nh, udp_port));
+      input_.reset(new velodyne_driver::InputSocket(private_nh));
     }
-
-  std::string devip;
-  private_nh.param("device_ip", devip, std::string(""));
-  if(!devip.empty())
-    ROS_INFO_STREAM("Set device ip to " << devip << ", only accepting packets from this address." );
-  input_->setDeviceIP(devip);
 
   // raw data output topic
   output_ = node.advertise<velodyne_msgs::VelodyneScan>("velodyne_packets", 10);
